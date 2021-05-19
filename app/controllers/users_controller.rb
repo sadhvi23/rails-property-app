@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: [:signup, :login, :create, :update, :logout]
+  skip_before_action :verify_authenticity_token, only: %i[signup login create update logout]
   before_action :authorize_request, except: %i[signup create login]
   before_action :set_user, only: %i[show update destroy logout]
 
@@ -53,6 +53,8 @@ class UsersController < ApplicationController
   # POST /users/login
   def login
     @user = User.find_by_email(params[:email])
+    raise 'Email Does not exists' if @user.nil?
+
     # Setting password digest because authenticate method internally checks for this attribute
     @user.password_digest = @user.encrypted_password
     if @user&.authenticate(params[:password])
