@@ -1,25 +1,32 @@
-# README
+# Prerequisites
+ The setups steps expect following tools installed on the system.
+ * Github
+ * Ruby 2.6.3
+ * Rails 6.1.3
+ * postgresql
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+# 1. Check out the repository
+  `git clone https://github.com/sadhvi23/rails-property-app.git`
 
-Things you may want to cover:
+# 2. Create database.yml file
+  * `cp config/database.yml.sample` `config/database.yml`
+  * postgres username and password need to be modified
 
-* Ruby version
+# 3. Create and setup the database
+  Run the following commands to create and setup the database.
 
-* System dependencies
+  * `bundle exec rake db:create`
+  * `bundle exec rake db:setup`
+  * `bundle exec rake db:migrate`
 
-* Configuration
+# 4. Install dependencies
+  You can install depencies using,
+  * `bundle install` command 
 
-* Database creation
+# 4. Start the Rails server
+ You can start the rails server using the command given below.
+ 
+ * `bundle exec rails s`
 
-* Database initialization
 
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
-# rails-property-app
+# And now you can visit the site with the URL http://localhost:3000
