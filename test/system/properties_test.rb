@@ -14,9 +14,9 @@ class PropertiesTest < ApplicationSystemTestCase
     visit properties_url
     click_on "New Property"
 
-    check "Active" if @property.active
-    fill_in "Approval status", with: @property.approval_status
-    fill_in "Availability status", with: @property.availability_status
+    check "Is active" if @property.active
+    fill_in "Is approved", with: @property.is_approved
+    fill_in "Is avaliable", with: @property.is_available
     fill_in "Name", with: @property.name
     click_on "Create Property"
 
@@ -29,8 +29,8 @@ class PropertiesTest < ApplicationSystemTestCase
     click_on "Edit", match: :first
 
     check "Active" if @property.active
-    fill_in "Approval status", with: @property.approval_status
-    fill_in "Availability status", with: @property.availability_status
+    fill_in "Is approved", with: @property.is_approved
+    fill_in "Is avaliable", with: @property.is_available
     fill_in "Name", with: @property.name
     click_on "Update Property"
 
