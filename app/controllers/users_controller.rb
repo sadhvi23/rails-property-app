@@ -27,7 +27,9 @@ class UsersController < ApplicationController
   # POST /user/signup
   def signup
     @user = User.new(signup_params)
-    @user.role = 'SUPER_ADMIN'
+    @user.is_active = true
+    @user.perform_action = "signup"
+    @user.update_user_role
     if @user.save
       render json: { user: @user }, status: :created
     else
