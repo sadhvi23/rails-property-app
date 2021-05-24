@@ -13,8 +13,8 @@ class PropertiesControllerTest < ActionDispatch::IntegrationTest
   test 'should create property' do
     assert_difference('Property.count') do
       post :create,
-           { property: { active: @property.active, approval_status: @property.approval_status,
-                         availability_status: @property.availability_status, name: @property.name } }
+           { property: { active: @property.active, is_approved: @property.is_approved,
+                         is_available: @property.is_available, name: @property.name } }
     end
     assert_redirected_to properties_path(Property.last)
     assert_equal 'Property was successfully created.', flash[:notice]
@@ -27,8 +27,8 @@ class PropertiesControllerTest < ActionDispatch::IntegrationTest
 
   test 'should update property' do
     patch property_url(@property),
-          params: { property: { active: @property.active, approval_status: @property.approval_status,
-                                availability_status: @property.availability_status, name: @property.name } }
+          params: { property: { active: @property.active, is_approved: @property.is_approved,
+                                is_available: @property.is_available, name: @property.name } }
     assert_redirected_to property_url(@property)
   end
 

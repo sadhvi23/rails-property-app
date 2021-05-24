@@ -10,29 +10,42 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_18_115824) do
+ActiveRecord::Schema.define(version: 2021_05_21_134015) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "properties", force: :cascade do |t|
     t.string "name"
-    t.string "approval_status", limit: 64, default: "ON_HOLD"
-    t.boolean "active", default: true
-    t.string "availability_status", limit: 64, default: "ON_HOLD"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.bigint "property_id"
-    t.bigint "created_by_id"
-    t.bigint "updated_by_id"
-    t.index ["created_by_id"], name: "index_properties_on_created_by_id"
-    t.index ["property_id"], name: "index_properties_on_property_id"
-    t.index ["updated_by_id"], name: "index_properties_on_updated_by_id"
+    t.bigint "owner_id"
+    t.boolean "is_approved", default: false
+    t.boolean "is_available", default: false
+    t.boolean "is_active", default: false
+    t.index ["owner_id"], name: "index_properties_on_owner_id"
+  end
+
+  create_table "roles", force: :cascade do |t|
+    t.string "name", default: ""
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.bigint "role_id"
+    t.index ["role_id"], name: "index_roles_on_role_id"
   end
 
   create_table "user_properties", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "user_roles", force: :cascade do |t|
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.bigint "user_id"
+    t.bigint "role_id"
+    t.index ["role_id"], name: "index_user_roles_on_role_id"
+    t.index ["user_id"], name: "index_user_roles_on_user_id"
   end
 
   create_table "user_tokens", force: :cascade do |t|
@@ -51,23 +64,26 @@ ActiveRecord::Schema.define(version: 2021_05_18_115824) do
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.string "name"
-    t.string "role", limit: 64
-    t.string "status", limit: 64, default: "ACTIVE"
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.bigint "role_id"
+    t.boolean "is_active"
     t.bigint "user_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["role_id"], name: "index_users_on_role_id"
     t.index ["user_id"], name: "index_users_on_user_id"
   end
 
-  add_foreign_key "properties", "properties"
-  add_foreign_key "properties", "users", column: "created_by_id"
-  add_foreign_key "properties", "users", column: "updated_by_id"
+  add_foreign_key "properties", "users", column: "owner_id"
+  add_foreign_key "roles", "roles"
+  add_foreign_key "user_roles", "roles"
+  add_foreign_key "user_roles", "users"
   add_foreign_key "user_tokens", "users"
   add_foreign_key "user_tokens", "users", column: "users_id"
+  add_foreign_key "users", "roles"
   add_foreign_key "users", "users"
 end

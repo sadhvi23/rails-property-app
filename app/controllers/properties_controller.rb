@@ -5,8 +5,8 @@ class PropertiesController < ApplicationController
 
   # GET /properties
   def index
-    @properties = if @current_user.role == 'USER'
-                    Property.where(approval_status: 'APPROVED')
+    @properties = if @current_user.roles.first.name == 'USER'
+                    Property.where(is_approved: 1)
                   else
                     Property.all
                   end
@@ -21,7 +21,6 @@ class PropertiesController < ApplicationController
   # POST /properties
   def create
     @property = Property.new(property_params)
-    @property.updated_by_id = @property.created_by_id
     if @property.save
       render json: @property
     else
@@ -59,6 +58,6 @@ class PropertiesController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def property_params
-    params.permit(:name, :active, :availability_status, :created_by_id, :approval_status)
+    params.permit(:name, :active, :is_available, :owner_id, :is_approved)
   end
 end
