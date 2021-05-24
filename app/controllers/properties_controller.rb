@@ -5,7 +5,7 @@ class PropertiesController < ApplicationController
 
   # GET /properties
   def index
-    @properties = if @current_user.roles.first.name == 'USER'
+    @properties = if @current_user.role.name == 'user'
                     Property.where(is_approved: 1)
                   else
                     Property.all
@@ -58,6 +58,6 @@ class PropertiesController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def property_params
-    params.permit(:name, :active, :is_available, :owner_id, :is_approved)
+    params.permit(:name, :is_active, :is_available, :owner_id, :is_approved)
   end
 end
