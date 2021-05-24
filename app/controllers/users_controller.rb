@@ -58,15 +58,16 @@ class UsersController < ApplicationController
     raise 'Email Does not exists' if @user.nil?
 
     # Setting password digest because authenticate method internally checks for this attribute
-    @user.password_digest = @user.encrypted_password
-    # if @user&.authenticate(params[:password])
+    sha1_password = Digest::SHA1.hexdigest("#{@user.encrypted_password}#{params[:password]}")
+    @user.password_digest = BCrypt::Password.create(sha1_password).to_s
+    if @user&.authenticate(sha1_password)
       token = JsonWebToken.encode(user_id: @user.id)
       time = (Time.now + 24.hours.to_i).strftime('%m-%d-%Y %H:%M')
       @user.store_user_tokens(token, time)
       render json: { token: token, exp: time, user: @user }, status: :ok
-    # else
-    #   render json: { error: 'unauthorized' }, status: :unauthorized
-    # end
+    else
+      render json: { error: 'unauthorized' }, status: :unauthorized
+    end
   end
 
   # POST /users/1/logout
