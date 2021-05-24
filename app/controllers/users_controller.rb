@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: %i[signup login create update logout]
+  skip_before_action :verify_authenticity_token
   before_action :authorize_request, except: %i[signup create login]
-  before_action :set_user, only: %i[show update destroy logout]
+  before_action :set_user, only: %i[show update destroy logout deactivate]
 
   # GET /users
   def index
@@ -17,6 +17,7 @@ class UsersController < ApplicationController
   # POST /users
   def create
     @user = User.new(user_params)
+    @user.is_active = true
     if @user.save
       render json: @user, status: :created
     else
@@ -28,7 +29,7 @@ class UsersController < ApplicationController
   def signup
     @user = User.new(signup_params)
     @user.is_active = true
-    @user.perform_action = "signup"
+    @user.perform_action = 'signup'
     @user.update_user_role
     if @user.save
       render json: { user: @user }, status: :created
@@ -55,18 +56,22 @@ class UsersController < ApplicationController
   # POST /users/login
   def login
     @user = User.find_by_email(params[:email])
-    raise 'Email Does not exists' if @user.nil?
+    if @user.is_active
+      raise 'Email Does not exists' if @user.nil?
 
-    # Setting password digest because authenticate method internally checks for this attribute
-    sha1_password = Digest::SHA1.hexdigest("#{@user.encrypted_password}#{params[:password]}")
-    @user.password_digest = BCrypt::Password.create(sha1_password).to_s
-    if @user&.authenticate(sha1_password)
-      token = JsonWebToken.encode(user_id: @user.id)
-      time = (Time.now + 24.hours.to_i).strftime('%m-%d-%Y %H:%M')
-      @user.store_user_tokens(token, time)
-      render json: { token: token, exp: time, user: @user }, status: :ok
+      # Setting password digest because authenticate method internally checks for this attribute
+      sha1_password = Digest::SHA1.hexdigest("#{@user.encrypted_password}#{params[:password]}")
+      @user.password_digest = BCrypt::Password.create(sha1_password).to_s
+      if @user&.authenticate(sha1_password)
+        token = JsonWebToken.encode(user_id: @user.id)
+        time = (Time.now + 24.hours.to_i).strftime('%m-%d-%Y %H:%M')
+        @user.store_user_tokens(token, time)
+        render json: { token: token, exp: time, user: @user }, status: :ok
+      else
+        render json: { error: 'unauthorized' }, status: :unauthorized
+      end
     else
-      render json: { error: 'unauthorized' }, status: :unauthorized
+      raise 'User has been deactivated'
     end
   end
 
@@ -76,6 +81,12 @@ class UsersController < ApplicationController
     header = header.split(' ').last if header
     @user.user_tokens.where(token: header).update_all(active: 0)
     render json: {}, status: :ok
+  end
+
+  # PUT /users/1/deactivate - deactivate user/admin
+  def deactivate
+    @user.update_column(:is_active, false)
+    render json: @user
   end
 
   private
