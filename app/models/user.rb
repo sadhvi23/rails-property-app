@@ -7,7 +7,6 @@ class User < ApplicationRecord
 
   # Associations
   has_many :properties
-  has_many :user_properties
   has_many :user_tokens
   has_many :user_roles
   belongs_to :role

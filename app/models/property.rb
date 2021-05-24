@@ -1,8 +1,6 @@
 class Property < ApplicationRecord
-  # Associations
+  # Association
   belongs_to :user, foreign_key: 'owner_id'
-  belongs_to :user, foreign_key: 'owner_id'
-  has_many :user_properties
 
   # Callbacks
   before_update :check_approval_status, if: :is_approved_changed?

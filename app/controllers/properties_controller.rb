@@ -45,8 +45,8 @@ class PropertiesController < ApplicationController
 
   # post /properties/1/add_owner
   def add_owner
-    @property.user_properties.create(params[:user_id])
-    render json: { property: @property, user_properties: @property.user_properties.last }
+    @property.update(owner_id: params[:user_id])
+    render json: @property
   end
 
   private
