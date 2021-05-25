@@ -34,7 +34,7 @@ class UsersController < ApplicationController
     if @user.save
       render json: { user: @user }, status: :created
     else
-      render json: { errors: @user.errors }, status: :unprocessable_entity
+      render json: { error: 'User already exists' }, status: :unprocessable_entity
     end
   end
 
@@ -56,9 +56,9 @@ class UsersController < ApplicationController
   # POST /users/login
   def login
     @user = User.find_by_email(params[:email])
-    if @user.is_active
-      raise 'Email Does not exists' if @user.nil?
+    raise 'Email Does not exists' if @user.nil?
 
+    if @user&.is_active
       # Setting password digest because authenticate method internally checks for this attribute
       sha1_password = Digest::SHA1.hexdigest("#{@user.encrypted_password}#{params[:password]}")
       @user.password_digest = BCrypt::Password.create(sha1_password).to_s
@@ -71,7 +71,7 @@ class UsersController < ApplicationController
         render json: { error: 'unauthorized' }, status: :unauthorized
       end
     else
-      raise 'User has been deactivated'
+      render json: { error: 'User has been deactivated' }, status: :unprocessable_entity
     end
   end
 
