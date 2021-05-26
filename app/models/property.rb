@@ -1,7 +1,7 @@
 class Property < ApplicationRecord
   # Associations
-  belongs_to :user, foreign_key: 'owner_id'
-  belongs_to :user, foreign_key: 'owner_id'
+  belongs_to :user, foreign_key: 'owner_id', optional: true
+  belongs_to :user, foreign_key: 'owner_id', optional: true
   has_many :user_properties
 
   # Callbacks
@@ -10,12 +10,12 @@ class Property < ApplicationRecord
 
   # Check only owner can update the approval status
   def check_approval_status
-    raise "User can't approve/reject properties" if user.role.name == 'user'
+    raise "User can't approve/reject properties" if user&.role&.name == 'user'
   end
 
   # Validate that user and admin cant update other property attributes
   def check_admin_can_update
-    if (user.role.name == 'user' || user.role.first.name == 'admin') && (is_available_changed? || name_changed? || is_active_changed?)
+    if (user&.role&.name == 'user' || user&.role&.name == 'admin') && (is_available_changed? || name_changed? || is_active_changed?)
       raise "Admin or User can't update other property attributes"
     end
   end

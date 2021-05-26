@@ -12,31 +12,61 @@ class PropertiesControllerTest < ActionDispatch::IntegrationTest
 
   test 'should create property' do
     assert_difference('Property.count') do
+      owner = User.last
       post :create,
            { property: { active: @property.active, is_approved: @property.is_approved,
-                         is_available: @property.is_available, name: @property.name } }
+                         is_available: @property.is_available, name: @property.name, owner_id: owner.id } }
     end
     assert_redirected_to properties_path(Property.last)
     assert_equal 'Property was successfully created.', flash[:notice]
   end
 
   test 'should show property' do
-    get property_url(@property)
+    get properties_url(@property)
     assert_response :success
   end
 
   test 'should update property' do
-    patch property_url(@property),
+    patch properties_url(@property),
           params: { property: { active: @property.active, is_approved: @property.is_approved,
                                 is_available: @property.is_available, name: @property.name } }
-    assert_redirected_to property_url(@property)
+    assert_redirected_to properties_url(@property)
   end
 
   test 'should destroy property' do
     assert_difference('Property.count', -1) do
-      delete property_url(@property)
+      delete properties_url(@property)
     end
 
     assert_redirected_to properties_url
+  end
+
+  test 'should add owner' do
+    assert_difference('Property.count') do
+      owner = User.last
+      post :create,
+           { property: { is_active: @property.is_active, is_approved: @property.is_approved,
+                         is_available: @property.is_available, name: @property.name, owner_id: owner.id } }
+    end
+    assert_redirected_to properties_path(Property.last)
+    assert_equal 'Property was successfully created.', flash[:notice]
+  end
+
+  test 'should update approval status' do
+    patch properties_url(@property),
+          params: { property: { is_approved: @property.is_approved } }
+    assert_redirected_to properties_url(@property)
+  end
+
+  test 'should update availability' do
+    patch properties_url(@property),
+          params: { property: { is_available: @property.is_available } }
+    assert_redirected_to properties_url(@property)
+  end
+
+  test 'should deactivate property' do
+    patch properties_url(@property),
+          params: { property: { is_active: 0 } }
+    assert_redirected_to properties_url(@property)
   end
 end

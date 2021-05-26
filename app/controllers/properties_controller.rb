@@ -1,7 +1,7 @@
 class PropertiesController < ApplicationController
   skip_before_action :verify_authenticity_token
   before_action :authorize_request
-  before_action :set_property, only: %i[show update destroy add_owner]
+  before_action :set_property, only: %i[show update destroy add_owner update_approval_status deactivate]
 
   # GET /properties
   def index
@@ -49,6 +49,24 @@ class PropertiesController < ApplicationController
     render json: { property: @property, user_properties: @property.user_properties.last }
   end
 
+  # PUT /properties/1/approval_status
+  def update_approval_status
+    @property.update(is_approved: params[:is_approved])
+    render json: @property
+  end
+
+  # PUT /properties/1/availability - When property has been purchased
+  def update_availability
+    @property.update(is_available: params[:is_available])
+    render json: @property
+  end
+
+  # PUT /properties/1/deactivate
+  def deactivate
+    @property.update(is_active: 0)
+    render json: @property
+  end
+
   private
 
   # Use callbacks to share common setup or constraints between actions.
@@ -58,6 +76,6 @@ class PropertiesController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def property_params
-    params.permit(:name, :is_active, :is_available, :owner_id, :is_approved)
+    params.permit(:name, :is_active, :is_available, :is_approved)
   end
 end
