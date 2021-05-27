@@ -5,6 +5,11 @@ class UsersController < ApplicationController
 
   # GET /users
   def index
+    @users = if @current_user.role.name == 'user' || @current_user.role.name == 'admin'
+               User.where(is_approved: 1, is_active: true)
+            else
+              User.all
+            end
     @users = User.all
     render json: @users, status: :ok
   end
@@ -16,10 +21,10 @@ class UsersController < ApplicationController
 
   # POST /users
   def create
-    @user = User.new(user_params)
-    @user.is_active = true
+    @user = User.new(user_params.except(:role))
+    @user.update_user_role(user_params[:role])
     if @user.save
-      render json: @user, status: :created
+      render json: { user: @user, role: user_params[:role] }, status: :created
     else
       render json: { errors: @user.errors }, status: :unprocessable_entity
     end
@@ -28,11 +33,10 @@ class UsersController < ApplicationController
   # POST /user/signup
   def signup
     @user = User.new(signup_params)
-    @user.is_active = true
     @user.perform_action = 'signup'
-    @user.update_user_role
+    @user.update_user_role('super_admin')
     if @user.save
-      render json: { user: @user }, status: :created
+      render json: { user: @user, role: @user.role.name }, status: :created
     else
       render json: { error: 'User already exists' }, status: :unprocessable_entity
     end
@@ -40,8 +44,9 @@ class UsersController < ApplicationController
 
   # PATCH/PUT /users/1
   def update
-    if @user.update(user_params)
-      render json: @user
+    @user.update_user_role(user_params[:role])
+    if @user.update(user_params.except(:role))
+      render json: { user: @user, role: user_params[:role] }
     else
       render json: { errors: @user.errors }, status: :unprocessable_entity
     end
@@ -66,7 +71,7 @@ class UsersController < ApplicationController
         token = JsonWebToken.encode(user_id: @user.id)
         time = (Time.now + 24.hours.to_i).strftime('%m-%d-%Y %H:%M')
         @user.store_user_tokens(token, time)
-        render json: { token: token, exp: time, user: @user }, status: :ok
+        render json: { token: token, exp: time, user: @user, role: @user.role.name }, status: :ok
       else
         render json: { error: 'unauthorized' }, status: :unauthorized
       end

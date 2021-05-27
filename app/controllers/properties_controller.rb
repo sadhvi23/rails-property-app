@@ -5,8 +5,8 @@ class PropertiesController < ApplicationController
 
   # GET /properties
   def index
-    @properties = if @current_user.role.name == 'user'
-                    Property.where(is_approved: 1)
+    @properties = if @current_user.role.name == 'user' || @current_user.role.name == 'admin'
+                    Property.where(is_approved: 1, is_active: true)
                   else
                     Property.all
                   end

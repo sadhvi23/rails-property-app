@@ -19,9 +19,10 @@ class User < ApplicationRecord
     user_tokens.create(token: token, expires_at: exp, active: 1)
   end
 
-  # Add role id in user signup
-  def update_user_role
-    role_id = Role.where(name: 'super_admin').first&.id
+  # Add role id in user signup/create
+  def update_user_role(role)
+    role_id = Role.where(name: role).first&.id
     self.role_id = role_id
+    self.is_active = true
   end
 end
