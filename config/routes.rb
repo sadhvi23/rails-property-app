@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   put '/properties/:id/approval_status', to: 'properties#update_approval_status'
   put '/properties/:id/availability', to: 'properties#update_availability'
   put '/properties/:id/deactivate', to: 'properties#deactivate'
+  get '/properties/me', to: 'properties#my_properties'
 
   # users routes
   resources :users

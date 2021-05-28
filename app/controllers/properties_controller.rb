@@ -50,7 +50,7 @@ class PropertiesController < ApplicationController
     user = User.where(email: params[:email]).first
     if user
       @property.update(owner_id: user.id)
-      render json: { property: @property, user_properties: @property.user_properties.last }
+      render json: @property
     else
       render json: { errors: 'User does not exists' }, status: :unprocessable_entity
     end
@@ -72,6 +72,13 @@ class PropertiesController < ApplicationController
   def deactivate
     @property.update(is_active: 0)
     render json: @property
+  end
+
+  # GET /properties/me
+  def my_properties
+    properties = Property.where(owner_id: @current_user.id)
+    p "===", properties
+    render json: properties
   end
 
   private
