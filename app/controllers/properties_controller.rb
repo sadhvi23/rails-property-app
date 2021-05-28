@@ -1,7 +1,7 @@
 class PropertiesController < ApplicationController
   skip_before_action :verify_authenticity_token
   before_action :authorize_request
-  before_action :set_property, only: %i[show update destroy add_owner update_approval_status deactivate]
+  before_action :set_property, only: %i[show update destroy add_owner update_approval_status deactivate update_availability]
 
   # GET /properties
   def index
@@ -21,6 +21,7 @@ class PropertiesController < ApplicationController
   # POST /properties
   def create
     @property = Property.new(property_params)
+    @property.is_active = true
     if @property.save
       render json: @property
     else
@@ -31,6 +32,7 @@ class PropertiesController < ApplicationController
   # PATCH/PUT /properties/1
   def update
     if @property.update(property_params)
+      @property.is_active = true
       render json: @property
     else
       render json: { errors: @property.errors }, status: :unprocessable_entity
@@ -45,8 +47,13 @@ class PropertiesController < ApplicationController
 
   # post /properties/1/add_owner
   def add_owner
-    @property.user_properties.create(params[:user_id])
-    render json: { property: @property, user_properties: @property.user_properties.last }
+    user = User.where(email: params[:email]).first
+    if user
+      @property.update(owner_id: user.id)
+      render json: @property
+    else
+      render json: { errors: 'User does not exists' }, status: :unprocessable_entity
+    end
   end
 
   # PUT /properties/1/approval_status
@@ -57,7 +64,7 @@ class PropertiesController < ApplicationController
 
   # PUT /properties/1/availability - When property has been purchased
   def update_availability
-    @property.update(is_available: params[:is_available])
+    @property.update(is_available: 0)
     render json: @property
   end
 
@@ -65,6 +72,13 @@ class PropertiesController < ApplicationController
   def deactivate
     @property.update(is_active: 0)
     render json: @property
+  end
+
+  # GET /properties/me
+  def my_properties
+    properties = Property.where(owner_id: @current_user.id)
+    p "===", properties
+    render json: properties
   end
 
   private
@@ -76,6 +90,6 @@ class PropertiesController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def property_params
-    params.permit(:name, :is_active, :is_available, :is_approved)
+    params.permit(:name, :is_available, :is_approved)
   end
 end

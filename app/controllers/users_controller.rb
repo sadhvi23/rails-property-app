@@ -6,17 +6,17 @@ class UsersController < ApplicationController
   # GET /users
   def index
     @users = if @current_user.role.name == 'user' || @current_user.role.name == 'admin'
-               User.where(is_approved: 1, is_active: true)
-            else
-              User.all
-            end
+               User.where(is_approved: 1, is_active: true, role: Role.where(name: ['user', 'admin']).ids)
+             else
+               User.all
+             end
     @users = User.all
     render json: @users, status: :ok
   end
 
   # GET /users/1
   def show
-    render json: @user, status: :ok
+    render json: { user: @user, role: @user.role.name }, status: :ok
   end
 
   # POST /users
@@ -36,7 +36,10 @@ class UsersController < ApplicationController
     @user.perform_action = 'signup'
     @user.update_user_role('super_admin')
     if @user.save
-      render json: { user: @user, role: @user.role.name }, status: :created
+      token = JsonWebToken.encode(user_id: @user.id)
+      time = (Time.now + 24.hours.to_i).strftime('%m-%d-%Y %H:%M')
+      @user.store_user_tokens(token, time)
+      render json: { user: @user, role: @user.role.name, token: token }, status: :created
     else
       render json: { error: 'User already exists' }, status: :unprocessable_entity
     end
@@ -44,9 +47,9 @@ class UsersController < ApplicationController
 
   # PATCH/PUT /users/1
   def update
-    @user.update_user_role(user_params[:role])
-    if @user.update(user_params.except(:role))
-      render json: { user: @user, role: user_params[:role] }
+    @user.update_user_role(user_params[:role]) if user_params[:role].present?
+    if @user.update_columns(name: user_params[:name], email: user_params[:email])
+      render json: { user: @user, role: @user.role.name }
     else
       render json: { errors: @user.errors }, status: :unprocessable_entity
     end
