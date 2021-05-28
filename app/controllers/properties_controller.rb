@@ -49,7 +49,7 @@ class PropertiesController < ApplicationController
   def add_owner
     user = User.where(email: params[:email]).first
     if user
-      @property.user_properties.create(user.id)
+      @property.update(owner_id: user.id)
       render json: { property: @property, user_properties: @property.user_properties.last }
     else
       render json: { errors: 'User does not exists' }, status: :unprocessable_entity
