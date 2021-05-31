@@ -30,3 +30,7 @@
 
 
 # And now you can visit the site with the URL http://localhost:3000
+
+# To configure smtp 
+ * Add username and password in environment file
+ * https://www.google.com/settings/u/0/security/lesssecureapps enable this permission for your sender email id so that BE can login to your email
