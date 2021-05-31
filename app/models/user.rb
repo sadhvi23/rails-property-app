@@ -6,8 +6,8 @@ class User < ApplicationRecord
   attr_accessor :password_digest, :perform_action
 
   # Associations
-  has_many :properties
-  has_many :user_tokens
+  has_many :properties, dependent: :destroy, foreign_key: :owner_id
+  has_many :user_tokens, dependent: :destroy
   belongs_to :role
 
   # Validation

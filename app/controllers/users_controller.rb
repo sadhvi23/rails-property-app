@@ -24,6 +24,7 @@ class UsersController < ApplicationController
     @user = User.new(user_params.except(:role))
     @user.update_user_role(user_params[:role])
     if @user.save
+      UserMailer.with(user: @user, password: user_params[:password]).new_user_email.deliver_later
       render json: { user: @user, role: user_params[:role] }, status: :created
     else
       render json: { errors: @user.errors }, status: :unprocessable_entity
