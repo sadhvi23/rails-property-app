@@ -6,7 +6,7 @@ class UsersController < ApplicationController
   # GET /users
   def index
     @users = if @current_user.role.name == 'user' || @current_user.role.name == 'admin'
-               User.where(is_approved: 1, is_active: true, role: Role.where(name: ['user', 'admin']).ids)
+               User.where(is_approved: 1, is_active: true, role: Role.where(name: %w[user admin]).ids)
              else
                User.all
              end
@@ -37,12 +37,10 @@ class UsersController < ApplicationController
     @user.perform_action = 'signup'
     @user.update_user_role('super_admin')
     if @user.save
-      token = JsonWebToken.encode(user_id: @user.id)
-      time = (Time.now + 24.hours.to_i).strftime('%m-%d-%Y %H:%M')
-      @user.store_user_tokens(token, time)
+      token = @user.generate_token
       render json: { user: @user, role: @user.role.name, token: token }, status: :created
     else
-      render json: { error: 'User already exists' }, status: :unprocessable_entity
+      render json: { status: 'error', message: @user.errors.first.message }
     end
   end
 
@@ -65,23 +63,18 @@ class UsersController < ApplicationController
   # POST /users/login
   def login
     @user = User.find_by_email(params[:email])
-    raise 'Email Does not exists' if @user.nil?
+    # Error handling
+    raise 'Email does not exists' if @user.nil?
+    is_authenticated = @user.authenticate(params[:password])
+    raise 'User has been deactivated' unless @user.is_active
+    raise 'Email/Password does not match' unless is_authenticated
 
-    if @user&.is_active
-      # Setting password digest because authenticate method internally checks for this attribute
-      sha1_password = Digest::SHA1.hexdigest("#{@user.encrypted_password}#{params[:password]}")
-      @user.password_digest = BCrypt::Password.create(sha1_password).to_s
-      if @user&.authenticate(sha1_password)
-        token = JsonWebToken.encode(user_id: @user.id)
-        time = (Time.now + 24.hours.to_i).strftime('%m-%d-%Y %H:%M')
-        @user.store_user_tokens(token, time)
-        render json: { token: token, exp: time, user: @user, role: @user.role.name }, status: :ok
-      else
-        render json: { error: 'unauthorized' }, status: :unauthorized
-      end
-    else
-      render json: { error: 'User has been deactivated' }, status: :unprocessable_entity
+    if is_authenticated
+      token = @user.generate_token
+      render json: { token: token, user: @user, role: @user.role.name }, status: :ok
     end
+  rescue StandardError => e
+    render json: { status: 'error', message: e.message }
   end
 
   # POST /users/1/logout

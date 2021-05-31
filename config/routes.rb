@@ -5,7 +5,6 @@ Rails.application.routes.draw do
   get '/properties/:id', to: 'properties#show'
   put '/properties/:id', to: 'properties#update'
   delete '/properties/:id', to: 'properties#destroy'
-  post '/properties/:id/add_owner', to: 'properties#add_owner'
   put '/properties/:id/approval_status', to: 'properties#update_approval_status'
   put '/properties/:id/availability', to: 'properties#update_availability'
   put '/properties/:id/deactivate', to: 'properties#deactivate'

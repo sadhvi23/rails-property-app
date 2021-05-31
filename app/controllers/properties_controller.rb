@@ -5,8 +5,10 @@ class PropertiesController < ApplicationController
 
   # GET /properties
   def index
-    @properties = if @current_user.role.name == 'user' || @current_user.role.name == 'admin'
-                    Property.where(is_approved: 1, is_active: true)
+    @properties = if @current_user.role.name == 'admin'
+                    Property.where(is_available: 1, is_active: true)
+                  elsif @current_user.role.name == 'user'
+                    Property.where(is_available: 1, is_active: true, is_approved: 1)
                   else
                     Property.all
                   end
@@ -45,17 +47,6 @@ class PropertiesController < ApplicationController
     render json: { head: :no_content }
   end
 
-  # post /properties/1/add_owner
-  def add_owner
-    user = User.where(email: params[:email]).first
-    if user
-      @property.update(owner_id: user.id)
-      render json: @property
-    else
-      render json: { errors: 'User does not exists' }, status: :unprocessable_entity
-    end
-  end
-
   # PUT /properties/1/approval_status
   def update_approval_status
     @property.update(is_approved: params[:is_approved])
@@ -76,9 +67,12 @@ class PropertiesController < ApplicationController
 
   # GET /properties/me
   def my_properties
-    properties = Property.where(owner_id: @current_user.id)
-    p "===", properties
-    render json: properties
+    if @current_user.role.name != 'super_admin'
+      properties = Property.where(owner_id: @current_user.id)
+      render json: properties
+    else
+      render json: { errors: 'Permission denied' }, status: :bad_request
+    end
   end
 
   private
@@ -90,6 +84,6 @@ class PropertiesController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def property_params
-    params.permit(:name, :is_available, :is_approved)
+    params.permit(:name, :is_available, :is_approved, :owner_id)
   end
 end
