@@ -1,7 +1,8 @@
 class PropertiesController < ApplicationController
   skip_before_action :verify_authenticity_token
   before_action :authorize_request
-  before_action :set_property, only: %i[show update destroy add_owner update_approval_status deactivate update_availability]
+  before_action :set_property, only: %i[show update destroy add_owner update_approval_status deactivate
+                                        update_availability]
 
   # GET /properties
   def index
@@ -17,7 +18,7 @@ class PropertiesController < ApplicationController
 
   # GET /properties/1
   def show
-    render json: @property
+    render json: { property: @property, owner: @property.user.email }
   end
 
   # POST /properties
@@ -55,7 +56,7 @@ class PropertiesController < ApplicationController
 
   # PUT /properties/1/availability - When property has been purchased
   def update_availability
-    @property.update(is_available: 0)
+    @property.update(is_available: 0, owner_id: @current_user.id)
     render json: @property
   end
 
@@ -65,10 +66,10 @@ class PropertiesController < ApplicationController
     render json: @property
   end
 
-  # GET /properties/me
+  # GET /properties/me/
   def my_properties
     if @current_user.role.name != 'super_admin'
-      properties = Property.where(owner_id: @current_user.id)
+      properties = Property.where(owner_id: @current_user.id, is_available: false)
       render json: properties
     else
       render json: { errors: 'Permission denied' }, status: :bad_request
