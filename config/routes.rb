@@ -15,6 +15,6 @@ Rails.application.routes.draw do
   resources :users
   post '/users/signup', to: 'users#signup'
   post '/users/login', to: 'users#login'
-  post '/users/:id/logout', to: 'users#logout'
+  put '/users/:id/logout', to: 'users#logout'
   put '/users/:id/deactivate', to: 'users#deactivate'
 end

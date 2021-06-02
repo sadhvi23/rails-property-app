@@ -12,6 +12,6 @@ class Property < ApplicationRecord
 
   # Check only owner can update the approval status
   def check_approval_status
-    raise "User can't approve/reject properties" if user&.role&.name == 'user'
+    raise "User can't approve/reject properties" if @current_user&.role&.name == 'user'
   end
 end
