@@ -1,7 +1,7 @@
 class PropertiesController < ApplicationController
   skip_before_action :verify_authenticity_token
   before_action :authorize_request
-  before_action :set_property, only: %i[show update destroy add_owner update_approval_status deactivate
+  before_action :set_property, only: %i[show update destroy add_owner update_approval_status deactivate_activate
                                         update_availability]
 
   # GET /properties
@@ -28,7 +28,7 @@ class PropertiesController < ApplicationController
     if @property.save
       render json: @property
     else
-      render json: { errors: @property.errors }, status: :unprocessable_entity
+      render json: { status: 'error', message: @property.errors.full_messages.first }
     end
   end
 
@@ -38,7 +38,7 @@ class PropertiesController < ApplicationController
       @property.is_active = true
       render json: @property
     else
-      render json: { errors: @property.errors }, status: :unprocessable_entity
+      render json: { status: 'error', message: @property.errors.full_messages.first }
     end
   end
 
@@ -61,8 +61,8 @@ class PropertiesController < ApplicationController
   end
 
   # PUT /properties/1/deactivate
-  def deactivate
-    @property.update(is_active: 0)
+  def deactivate_activate
+    @property.update(is_active: !@property.is_active)
     render json: @property
   end
 

@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
   skip_before_action :verify_authenticity_token
   before_action :authorize_request, except: %i[signup create login]
-  before_action :set_user, only: %i[show update destroy logout deactivate]
+  before_action :set_user, only: %i[show update destroy logout deactivate_activate]
 
   # GET /users
   def index
@@ -27,7 +27,7 @@ class UsersController < ApplicationController
       UserMailer.with(user: @user, password: user_params[:password]).new_user_email.deliver_later
       render json: { user: @user, role: user_params[:role] }, status: :created
     else
-      render json: { errors: @user.errors }, status: :unprocessable_entity
+      render json: { status: 'error', message: @user.errors.full_messages.first }
     end
   end
 
@@ -86,8 +86,8 @@ class UsersController < ApplicationController
   end
 
   # PUT /users/1/deactivate - deactivate user/admin
-  def deactivate
-    @user.update_column(:is_active, false)
+  def deactivate_activate
+    @user.update_column(:is_active, !@user.is_active)
     render json: @user
   end
 

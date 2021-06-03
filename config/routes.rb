@@ -8,7 +8,7 @@ Rails.application.routes.draw do
   delete '/properties/:id', to: 'properties#destroy'
   put '/properties/:id/approval_status', to: 'properties#update_approval_status'
   put '/properties/:id/availability', to: 'properties#update_availability'
-  put '/properties/:id/deactivate', to: 'properties#deactivate'
+  put '/properties/:id/deactivate', to: 'properties#deactivate_activate'
 
 
   # users routes
@@ -16,5 +16,5 @@ Rails.application.routes.draw do
   post '/users/signup', to: 'users#signup'
   post '/users/login', to: 'users#login'
   put '/users/:id/logout', to: 'users#logout'
-  put '/users/:id/deactivate', to: 'users#deactivate'
+  put '/users/:id/deactivate', to: 'users#deactivate_activate'
 end
