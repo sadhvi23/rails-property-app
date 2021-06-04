@@ -11,14 +11,10 @@ class PropertiesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should create property' do
-    assert_difference('Property.count') do
-      owner = User.last
-      post :create,
-           { property: { active: @property.active, is_approved: @property.is_approved,
-                         is_available: @property.is_available, name: @property.name, owner_id: owner.id } }
-    end
+    owner = User.last
+    Property.create({ active: @property.active, is_approved: @property.is_approved,
+                         is_available: @property.is_available, name: @property.name, owner_id: owner.id } )
     assert_redirected_to properties_path(Property.last)
-    assert_equal 'Property was successfully created.', flash[:notice]
   end
 
   test 'should show property' do
@@ -27,9 +23,8 @@ class PropertiesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'should update property' do
-    patch properties_url(@property),
-          params: { property: { active: @property.active, is_approved: @property.is_approved,
-                                is_available: @property.is_available, name: @property.name } }
+    Property.where(id: @property.id).update({ active: @property.active, is_approved: @property.is_approved,
+                                                         is_available: @property.is_available, name: @property.name })
     assert_redirected_to properties_url(@property)
   end
 
@@ -44,12 +39,9 @@ class PropertiesControllerTest < ActionDispatch::IntegrationTest
   test 'should add owner' do
     assert_difference('Property.count') do
       owner = User.last
-      post :create,
-           { property: { is_active: @property.is_active, is_approved: @property.is_approved,
-                         is_available: @property.is_available, name: @property.name, owner_id: owner.id } }
+      @property.update(owner_id: owner.id )
     end
     assert_redirected_to properties_path(Property.last)
-    assert_equal 'Property was successfully created.', flash[:notice]
   end
 
   test 'should update approval status' do

@@ -30,8 +30,6 @@ ActiveRecord::Schema.define(version: 2021_05_31_122234) do
     t.string "name", default: ""
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.bigint "role_id"
-    t.index ["role_id"], name: "index_roles_on_role_id"
   end
 
   create_table "user_tokens", id: :serial, force: :cascade do |t|
@@ -57,18 +55,14 @@ ActiveRecord::Schema.define(version: 2021_05_31_122234) do
     t.datetime "updated_at", precision: 6, null: false
     t.integer "role_id"
     t.boolean "is_active"
-    t.bigint "user_id"
     t.text "salt"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role_id"], name: "index_users_on_role_id"
-    t.index ["user_id"], name: "index_users_on_user_id"
   end
 
   add_foreign_key "properties", "users", column: "owner_id"
-  add_foreign_key "roles", "roles"
   add_foreign_key "user_tokens", "users"
   add_foreign_key "user_tokens", "users", column: "users_id"
   add_foreign_key "users", "roles"
-  add_foreign_key "users", "users"
 end
