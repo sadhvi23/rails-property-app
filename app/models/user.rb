@@ -18,23 +18,19 @@ class User < ApplicationRecord
 
   # Add role id in user signup/create
   def update_user_role(role)
-    role_id = Role.where(name: role).first&.id
-    self.role_id = role_id
-    self.is_active = true
+    assign_attributes(role_id: Role.where(name: role).first&.id, is_active: true)
   end
 
   # Generate Token
   def generate_token
     token = JsonWebToken.encode(user_id: id)
-    time = (Time.now + 24.hours.to_i).strftime('%m-%d-%Y %H:%M')
-    store_user_tokens(token, time)
+    store_user_tokens(token, (Time.now + 24.hours.to_i).strftime('%m-%d-%Y %H:%M'))
     token
   end
 
   # Check authentication
   def authenticate(password)
-    new_password = BCrypt::Engine.hash_secret(password, salt)
-    encrypted_password == new_password
+    encrypted_password == BCrypt::Engine.hash_secret(password, salt)
   end
 
   private
@@ -44,12 +40,8 @@ class User < ApplicationRecord
     user_tokens.create(token: token, expires_at: exp, active: 1)
   end
 
-
   # Store unique key and password
   def encrypt_password
-    if password.present?
-      self.salt = BCrypt::Engine.generate_salt
-      self.encrypted_password = BCrypt::Engine.hash_secret(password, salt)
-    end
+    assign_attributes(salt: BCrypt::Engine.generate_salt, encrypted_password: BCrypt::Engine.hash_secret(password, salt))
   end
 end

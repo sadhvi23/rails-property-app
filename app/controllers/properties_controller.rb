@@ -72,7 +72,7 @@ class PropertiesController < ApplicationController
       properties = Property.where(owner_id: @current_user.id, is_available: false)
       render json: properties
     else
-      render json: { errors: 'Permission denied' }, status: :bad_request
+      render json: { status: 'error', message: 'Permission denied' }, status: :bad_request
     end
   end
 
