@@ -5,10 +5,4 @@ one:
   email: "example1@abc.com"
   name: "my string1"
   encrypted_password: "password"
-  role_id: 3
-two:
-  is_active: 1
-  email: "example2@abc.com"
-  name: "my string2"
-  encrypted_password: "password"
-  role_id: 3
+  role: "admin"

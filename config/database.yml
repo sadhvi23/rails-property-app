@@ -16,9 +16,9 @@ test:
   <<: *default
   adapter: postgresql
   encoding: unicode
-  database: ajackus_db_test-1
+  database: ajackus_db
   pool: 5
-  username: root1
+  username: root
   password: root
 
 production:

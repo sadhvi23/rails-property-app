@@ -10,7 +10,6 @@ class UsersController < ApplicationController
              else
                User.all
              end
-    @users = User.all
     render json: @users, status: :ok
   end
 
@@ -50,7 +49,7 @@ class UsersController < ApplicationController
     if @user.update_columns(name: user_params[:name], email: user_params[:email])
       render json: { user: @user, role: @user.role.name }
     else
-      render json: { errors: @user.errors }, status: :unprocessable_entity
+      render json: { status: 'error', errors: @user.errors }, status: :unprocessable_entity
     end
   end
 
@@ -65,6 +64,7 @@ class UsersController < ApplicationController
     @user = User.find_by_email(params[:email])
     # Error handling
     raise 'Email does not exists' if @user.nil?
+
     is_authenticated = @user.authenticate(params[:password])
     raise 'User has been deactivated' unless @user.is_active
     raise 'Email/Password does not match' unless is_authenticated
@@ -97,7 +97,7 @@ class UsersController < ApplicationController
   def set_user
     @user = User.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render json: { errors: 'User not found' }, status: :not_found
+    render json: { status: 'error', message: 'User not found' }, status: :not_found
   end
 
   # Only allow a list of trusted parameters through.
